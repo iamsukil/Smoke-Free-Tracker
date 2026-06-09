@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Quit Lines — India smoking cessation helpline and resources."/>
+  <title>Support | Smoke-Free Tracker</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <meta name="theme-color" content="#7C3AED"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="SmokeFree"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+  <style>
+    /* ── Support page specific styles ─────────────────────────────────── */
+    .support-hero {
+      text-align: center;
+      padding: 40px 24px 28px;
+      position: relative;
+    }
+    .support-phone-icon {
+      font-size: 72px;
+      display: block;
+      margin-bottom: 16px;
+      animation: float 3s ease-in-out infinite;
+    }
+    .support-hero h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .support-hero p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      max-width: 420px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    .india-flag {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      font-size: 28px;
+    }
+
+    /* Quit-line cards */
+    .quit-line-card {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      transition: var(--transition);
+      margin-bottom: 16px;
+    }
+    .quit-line-card:hover {
+      border-color: var(--glass-border-hover);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .quit-line-card-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+      background: rgba(16, 185, 129, 0.12);
+    }
+    .quit-line-card-body { flex: 1; }
+    .quit-line-number {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+    .quit-line-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .btn-call {
+      background: var(--gradient-green);
+      color: white;
+      padding: 12px 22px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+      flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+    .btn-call:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+    }
+
+    /* Tips section */
+    .tip-card {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .tip-card:hover { background: var(--bg-card-hover); }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <a href="/dashboard.html" class="sidebar-logo">
+      <div class="sidebar-logo-icon">🚭</div>
+      <div class="sidebar-logo-text">Smoke-Free<br>Tracker</div>
+    </a>
+    <span class="nav-section-label">Main</span>
+    <a href="/dashboard.html"    class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="/health.html"       class="nav-link"><span class="nav-icon">❤️</span> Health Timeline</a>
+    <a href="/achievements.html" class="nav-link"><span class="nav-icon">🏆</span> Achievements</a>
+    <a href="/cravings.html"     class="nav-link"><span class="nav-icon">📈</span> Cravings</a>
+    <a href="/progress.html"     class="nav-link"><span class="nav-icon">📉</span> Progress</a>
+    <span class="nav-section-label">Community</span>
+    <a href="/community.html"    class="nav-link"><span class="nav-icon">💬</span> Community</a>
+    <a href="/support.html"      class="nav-link active"><span class="nav-icon">📞</span> Support</a>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar" id="sidebar-avatar">?</div>
+        <div>
+          <div class="sidebar-user-name" id="sidebar-name">Loading...</div>
+          <div class="sidebar-user-role">Member</div>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm btn-block mt-1" onclick="logout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Hero Section -->
+    <div class="card support-hero mb-3">
+      <span class="india-flag" title="India">🇮🇳</span>
+      <span class="support-phone-icon">📞</span>
+      <h1 class="page-title" style="font-size:26px;margin-bottom:8px;">Quit Lines</h1>
+      <p>You don't have to do this alone. Trained counsellors are ready to help you quit — free of charge.</p>
+    </div>
+
+    <div class="grid-2" style="align-items:start;">
+
+      <!-- Left: Helpline cards -->
+      <div>
+        <h2 style="font-size:15px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:16px;">📋 Helplines</h2>
+
+        <!-- Card 1: National Helpline -->
+        <div class="quit-line-card">
+          <div class="quit-line-card-icon">📱</div>
+          <div class="quit-line-card-body">
+            <div class="quit-line-number">1800 112 356</div>
+            <div class="quit-line-desc">
+              National phone number on quitting smoking.<br>
+              <strong style="color:var(--accent-green);">Toll-free · Available 24×7</strong>
+            </div>
+          </div>
+          <a href="tel:1800112356" class="btn-call" id="call-btn-1" onclick="trackCall('1800 112 356')">
+            📞 Call
+          </a>
+        </div>
+
+        <!-- Card 2: NHP Website -->
+        <div class="quit-line-card">
+          <div class="quit-line-card-icon">🌐</div>
+          <div class="quit-line-card-body">
+            <div class="quit-line-number" style="font-size:17px;">qps.nhsrcindia.org</div>
+            <div class="quit-line-desc">
+              NHSRC India — Quit Tobacco &amp; Smoking resources,<br>
+              guides, and online cessation support tools.
+            </div>
+          </div>
+          <a href="https://qps.nhsrcindia.org/hi/node/84"
+             target="_blank" rel="noopener noreferrer"
+             class="btn-call" id="open-btn-1">
+            🌐 Open
+          </a>
+        </div>
+
+        <!-- Card 3: iCall (bonus) -->
+        <div class="quit-line-card">
+          <div class="quit-line-card-icon">🧠</div>
+          <div class="quit-line-card-body">
+            <div class="quit-line-number">9152987821</div>
+            <div class="quit-line-desc">
+              iCall — psychological counselling helpline by TISS.<br>
+              <strong style="color:var(--accent-primary);">Mon–Sat · 8 AM – 10 PM</strong>
+            </div>
+          </div>
+          <a href="tel:9152987821" class="btn-call" id="call-btn-2">
+            📞 Call
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: Tips + Motivational content -->
+      <div>
+        <h2 style="font-size:15px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:16px;">💡 When to Call</h2>
+
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+          <div class="tip-card">
+            <span style="font-size:22px;flex-shrink:0;">🆘</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:2px;">Feeling an intense craving</div>
+              <div style="font-size:12px;color:var(--text-secondary);">A counsellor can talk you through it and help you resist the urge.</div>
+            </div>
+          </div>
+          <div class="tip-card">
+            <span style="font-size:22px;flex-shrink:0;">😟</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:2px;">Feeling anxious or irritable</div>
+              <div style="font-size:12px;color:var(--text-secondary);">Nicotine withdrawal symptoms peak in days 2–3. Support helps.</div>
+            </div>
+          </div>
+          <div class="tip-card">
+            <span style="font-size:22px;flex-shrink:0;">🔁</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:2px;">Had a relapse</div>
+              <div style="font-size:12px;color:var(--text-secondary);">A slip is not a failure. Call and get back on track today.</div>
+            </div>
+          </div>
+          <div class="tip-card">
+            <span style="font-size:22px;flex-shrink:0;">🤔</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:2px;">Need a personalised quit plan</div>
+              <div style="font-size:12px;color:var(--text-secondary);">Counsellors can recommend NRT options and set milestone goals with you.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Motivational card -->
+        <div class="card" style="border-color:rgba(108,99,255,0.25);background:rgba(108,99,255,0.06);">
+          <div style="font-size:32px;margin-bottom:12px;">🌱</div>
+          <h3 style="font-size:16px;font-weight:700;margin-bottom:8px;">You are not alone</h3>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+            Over <strong style="color:var(--text-primary);">1 million people</strong> quit smoking every year in India with support.
+            Reaching out for help is one of the strongest things you can do for yourself.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="/js/support.js"></script>
+<script src="/js/pwa.js"></script>
+</body>
+</html>

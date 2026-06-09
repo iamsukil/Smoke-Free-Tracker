@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Cravings Tracker — Log and monitor your cigarette cravings with Chart.js visualization."/>
+  <title>Cravings Tracker | Smoke-Free Tracker</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <meta name="theme-color" content="#7C3AED"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="SmokeFree"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <a href="/dashboard.html" class="sidebar-logo">
+      <div class="sidebar-logo-icon">🚭</div>
+      <div class="sidebar-logo-text">Smoke-Free<br>Tracker</div>
+    </a>
+    <span class="nav-section-label">Main</span>
+    <a href="/dashboard.html"    class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="/health.html"       class="nav-link"><span class="nav-icon">❤️</span> Health Timeline</a>
+    <a href="/achievements.html" class="nav-link"><span class="nav-icon">🏆</span> Achievements</a>
+    <a href="/cravings.html"     class="nav-link active"><span class="nav-icon">📈</span> Cravings</a>
+    <a href="/progress.html"     class="nav-link"><span class="nav-icon">📉</span> Progress</a>
+    <span class="nav-section-label">Community</span>
+    <a href="/community.html"    class="nav-link"><span class="nav-icon">💬</span> Community</a>
+    <a href="/support.html"      class="nav-link"><span class="nav-icon">📞</span> Support</a>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar" id="sidebar-avatar">?</div>
+        <div>
+          <div class="sidebar-user-name" id="sidebar-name">Loading...</div>
+          <div class="sidebar-user-role">Member</div>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm btn-block mt-1" onclick="logout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">Cravings Tracker 📈</h1>
+      <p class="page-subtitle">Log cravings and watch them diminish over time</p>
+    </div>
+
+    <div class="grid-2" style="align-items:start;">
+
+      <!-- Log Form + Recent Logs -->
+      <div>
+        <!-- Log Craving -->
+        <div class="card mb-3">
+          <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;">🆘 Feeling a Craving?</h3>
+          <div id="craving-alert"></div>
+          <form id="craving-form" novalidate>
+            <div class="form-group">
+              <label class="form-label">Intensity (1 = mild, 10 = intense)</label>
+              <input type="range" class="range-slider" id="intensity-slider"
+                     min="1" max="10" value="5" oninput="updateIntensity(this.value)"/>
+              <div class="range-value" id="intensity-display">5</div>
+              <!-- Colour bar -->
+              <div class="intensity-bar" id="intensity-bar"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="trigger-select">What triggered it?</label>
+              <select class="form-select" id="trigger-select" name="trigger">
+                <option value="Stress">😤 Stress</option>
+                <option value="Boredom">😐 Boredom</option>
+                <option value="After Meal">🍽️ After Meal</option>
+                <option value="Social Situation">👥 Social Situation</option>
+                <option value="Coffee">☕ Coffee/Caffeine</option>
+                <option value="Alcohol">🍺 Alcohol</option>
+                <option value="Anxiety">😰 Anxiety</option>
+                <option value="Habit">🔄 Habit/Routine</option>
+                <option value="Other">❓ Other</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" id="log-btn">
+              Log Craving — You've Got This! 💪
+            </button>
+          </form>
+        </div>
+
+        <!-- Recent Logs -->
+        <div class="card">
+          <h3 style="font-size:15px;font-weight:600;margin-bottom:16px;">🕐 Recent Cravings</h3>
+          <div id="recent-logs-loading" class="loading" style="padding:20px;">
+            <div class="spinner"></div>
+          </div>
+          <div id="recent-logs" class="hidden"></div>
+          <div id="recent-empty" class="hidden" style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">
+            No cravings logged yet. That's amazing! 🎉
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart + Stats -->
+      <div>
+        <!-- Chart -->
+        <div class="card mb-3">
+          <div class="flex-between mb-2">
+            <h3 style="font-size:16px;font-weight:600;">📊 Last 7 Days</h3>
+            <span id="total-count" class="badge badge-purple">0 total</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="cravings-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="card">
+          <h3 style="font-size:15px;font-weight:600;margin-bottom:12px;">💪 Beat the Craving</h3>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <span style="font-size:20px;flex-shrink:0;">🌬️</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;">Deep Breathing</div>
+                <div style="font-size:12px;color:var(--text-secondary);">Take 10 slow, deep breaths. Cravings peak in 3 minutes then fade.</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <span style="font-size:20px;flex-shrink:0;">💧</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;">Drink Water</div>
+                <div style="font-size:12px;color:var(--text-secondary);">A glass of cold water can quickly suppress nicotine urges.</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <span style="font-size:20px;flex-shrink:0;">🏃</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;">Move Your Body</div>
+                <div style="font-size:12px;color:var(--text-secondary);">Even a 5-minute walk reduces craving intensity significantly.</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <span style="font-size:20px;flex-shrink:0;">📱</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;">Distract Yourself</div>
+                <div style="font-size:12px;color:var(--text-secondary);">Call a friend, play a game, or read — cravings last only ~3-5 min.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="/js/cravings.js"></script>
+<script src="/js/pwa.js"></script>
+</body>
+</html>
