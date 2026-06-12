@@ -11,13 +11,13 @@ COPY pom.xml .
 RUN chmod +x mvnw
 
 # Download dependencies first (cached if pom.xml unchanged)
-RUN ./mvnw dependency:go-offline -B
+RUN ./mvnw dependency:go-offline -B --no-transfer-progress
 
-# Copy source code
+# Copy source code (includes src/main/resources/static/ with all frontend files)
 COPY src ./src
 
-# Build the JAR
-RUN ./mvnw clean package -DskipTests -B
+# Build the fat JAR — frontend assets are bundled inside
+RUN ./mvnw clean package -DskipTests -B --no-transfer-progress
 
 # ===== Stage 2: Run =====
 FROM eclipse-temurin:21-jre

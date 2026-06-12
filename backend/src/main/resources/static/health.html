@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Smoke-Free Health Timeline — Watch your body recover milestone by milestone."/>
+  <title>Health Timeline | Smoke-Free Tracker</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <meta name="theme-color" content="#7C3AED"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="SmokeFree"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+  <style>
+    /* ── Milestone Progress Card ─────────────────────── */
+    .milestone-item {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      transition: var(--transition);
+    }
+    .milestone-item:hover {
+      border-color: var(--glass-border-hover);
+      background: var(--bg-card-hover);
+      transform: translateX(3px);
+    }
+    .milestone-item.reached {
+      border-color: rgba(16, 185, 129, 0.25);
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    /* Progress bar row */
+    .milestone-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .milestone-bar-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      min-width: 28px;
+      text-align: right;
+    }
+    .milestone-bar-track {
+      flex: 1;
+      background: rgba(255,255,255,0.07);
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .milestone-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--gradient-green);
+      transition: width 1.2s cubic-bezier(.4,0,.2,1);
+      width: 0%;
+    }
+    .milestone-item.reached .milestone-bar-fill {
+      background: var(--accent-green);
+    }
+    .milestone-bar-max {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+      min-width: 28px;
+    }
+
+    /* Bottom row */
+    .milestone-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .milestone-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+      flex: 1;
+    }
+    .milestone-chevron {
+      font-size: 18px;
+      font-weight: 800;
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    .milestone-chevron.done {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-green);
+    }
+    .milestone-chevron.pending {
+      background: rgba(255,255,255,0.06);
+      color: var(--text-muted);
+    }
+    .milestone-time-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <a href="/dashboard.html" class="sidebar-logo">
+      <div class="sidebar-logo-icon">🚭</div>
+      <div class="sidebar-logo-text">Smoke-Free<br>Tracker</div>
+    </a>
+    <span class="nav-section-label">Main</span>
+    <a href="/dashboard.html"    class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="/health.html"       class="nav-link active"><span class="nav-icon">❤️</span> Health Timeline</a>
+    <a href="/achievements.html" class="nav-link"><span class="nav-icon">🏆</span> Achievements</a>
+    <a href="/cravings.html"     class="nav-link"><span class="nav-icon">📈</span> Cravings</a>
+    <a href="/progress.html"     class="nav-link"><span class="nav-icon">📉</span> Progress</a>
+    <span class="nav-section-label">Community</span>
+    <a href="/community.html"    class="nav-link"><span class="nav-icon">💬</span> Community</a>
+    <a href="/support.html"      class="nav-link"><span class="nav-icon">📞</span> Support</a>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar" id="sidebar-avatar">?</div>
+        <div>
+          <div class="sidebar-user-name" id="sidebar-name">Loading...</div>
+          <div class="sidebar-user-role">Member</div>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm btn-block mt-1" onclick="logout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">Health Timeline ❤️</h1>
+      <p class="page-subtitle">Watch your body recover — milestone by milestone</p>
+    </div>
+
+    <!-- Next Milestone Banner -->
+    <div id="next-milestone-banner" class="card mb-3 hidden"
+         style="border-color:rgba(108,99,255,0.3);background:rgba(108,99,255,0.06);">
+      <div class="flex-between">
+        <div>
+          <div style="font-size:11px;color:var(--text-muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">Up Next</div>
+          <div style="font-size:17px;font-weight:700;" id="next-milestone-name">—</div>
+          <div style="font-size:13px;color:var(--text-secondary);margin-top:4px;" id="next-milestone-time">—</div>
+        </div>
+        <div style="font-size:40px;">⏳</div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading"><div class="spinner"></div></div>
+
+    <!-- Timeline + Summary -->
+    <div id="timeline-container" class="hidden">
+      <div class="grid-2" style="align-items:start;">
+
+        <!-- Milestone List -->
+        <div id="milestone-list"></div>
+
+        <!-- Summary Sidebar -->
+        <div>
+          <div class="card mb-2">
+            <h3 style="font-size:15px;font-weight:600;margin-bottom:16px;">📊 Recovery Summary</h3>
+            <div class="flex-between mb-1">
+              <span class="text-muted" style="font-size:13px;">Milestones Reached</span>
+              <span style="font-weight:700;color:var(--accent-green);" id="summary-reached">0/0</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.06);border-radius:999px;height:8px;overflow:hidden;margin-bottom:16px;">
+              <div id="health-bar" style="height:100%;border-radius:999px;background:var(--gradient-green);transition:width 1s ease;width:0%;"></div>
+            </div>
+            <div id="milestone-icons" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size:15px;font-weight:600;margin-bottom:12px;">💡 Did You Know?</h3>
+            <div style="font-size:13px;color:var(--text-secondary);line-height:1.7;">
+              <p>🫁 Your lungs have over 300 million air sacs (alveoli) that slowly recover when you quit smoking.</p>
+              <br>
+              <p>❤️ Just 20 minutes after quitting, your heart rate and blood pressure return to normal.</p>
+              <br>
+              <p>🧠 After 1 year smoke-free, your risk of coronary heart disease is cut in half!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="/js/health.js"></script>
+<script src="/js/pwa.js"></script>
+</body>
+</html>

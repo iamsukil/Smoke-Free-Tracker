@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Smoke-Free Community — Share your journey, celebrate wins, support others."/>
+  <title>Community | Smoke-Free Tracker</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <meta name="theme-color" content="#7C3AED"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="SmokeFree"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <a href="/dashboard.html" class="sidebar-logo">
+      <div class="sidebar-logo-icon">🚭</div>
+      <div class="sidebar-logo-text">Smoke-Free<br>Tracker</div>
+    </a>
+    <span class="nav-section-label">Main</span>
+    <a href="/dashboard.html"    class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="/health.html"       class="nav-link"><span class="nav-icon">❤️</span> Health Timeline</a>
+    <a href="/achievements.html" class="nav-link"><span class="nav-icon">🏆</span> Achievements</a>
+    <a href="/cravings.html"     class="nav-link"><span class="nav-icon">📈</span> Cravings</a>
+    <a href="/progress.html"     class="nav-link"><span class="nav-icon">📉</span> Progress</a>
+    <span class="nav-section-label">Community</span>
+    <a href="/community.html"    class="nav-link active"><span class="nav-icon">💬</span> Community</a>
+    <a href="/support.html"      class="nav-link"><span class="nav-icon">📞</span> Support</a>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar" id="sidebar-avatar">?</div>
+        <div>
+          <div class="sidebar-user-name" id="sidebar-name">Loading...</div>
+          <div class="sidebar-user-role">Member</div>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm btn-block mt-1" onclick="logout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">Community 💬</h1>
+      <p class="page-subtitle">Support and inspire others on their smoke-free journey</p>
+    </div>
+
+    <div class="grid-2" style="align-items:start;">
+
+      <!-- Post Feed -->
+      <div>
+        <div id="post-alert" class="mb-2"></div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading"><div class="spinner"></div></div>
+
+        <!-- Posts -->
+        <div id="posts-container" class="hidden"></div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="pagination hidden"></div>
+
+        <!-- Empty -->
+        <div id="empty-state" class="hidden">
+          <div class="empty-state">
+            <div class="empty-state-icon">💬</div>
+            <h3>No posts yet</h3>
+            <p>Be the first to share your journey!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create Post + Sidebar -->
+      <div style="position:sticky;top:24px;">
+        <!-- Create Post -->
+        <div class="card mb-3">
+          <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;">✏️ Share Your Story</h3>
+          <div id="create-alert"></div>
+          <form id="create-post-form" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="post-content">What's on your mind?</label>
+              <textarea class="form-textarea" id="post-content" name="content"
+                        placeholder="Share a milestone, tip, or encouraging word..."
+                        style="min-height:120px;" maxlength="1000"></textarea>
+              <div style="text-align:right;font-size:11px;color:var(--text-muted);margin-top:4px;">
+                <span id="char-count">0</span>/1000
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" id="post-btn">
+              Post to Community
+            </button>
+          </form>
+        </div>
+
+        <!-- Community Tips -->
+        <div class="card">
+          <h3 style="font-size:15px;font-weight:600;margin-bottom:12px;">💡 Community Guidelines</h3>
+          <ul style="list-style:none;font-size:13px;color:var(--text-secondary);line-height:2;">
+            <li>✅ Be supportive and encouraging</li>
+            <li>✅ Share your wins, big or small</li>
+            <li>✅ Ask for help when you need it</li>
+            <li>❌ No spam or promotional content</li>
+            <li>❌ No negativity or judgment</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="/js/community.js"></script>
+<script src="/js/pwa.js"></script>
+</body>
+</html>

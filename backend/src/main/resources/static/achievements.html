@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Smoke-Free Achievements — Unlock badges as you hit smoke-free milestones."/>
+  <title>Achievements | Smoke-Free Tracker</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <meta name="theme-color" content="#7C3AED"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="SmokeFree"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <a href="/dashboard.html" class="sidebar-logo">
+      <div class="sidebar-logo-icon">🚭</div>
+      <div class="sidebar-logo-text">Smoke-Free<br>Tracker</div>
+    </a>
+    <span class="nav-section-label">Main</span>
+    <a href="/dashboard.html"    class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="/health.html"       class="nav-link"><span class="nav-icon">❤️</span> Health Timeline</a>
+    <a href="/achievements.html" class="nav-link active"><span class="nav-icon">🏆</span> Achievements</a>
+    <a href="/cravings.html"     class="nav-link"><span class="nav-icon">📈</span> Cravings</a>
+    <a href="/progress.html"     class="nav-link"><span class="nav-icon">📉</span> Progress</a>
+    <span class="nav-section-label">Community</span>
+    <a href="/community.html"    class="nav-link"><span class="nav-icon">💬</span> Community</a>
+    <a href="/support.html"      class="nav-link"><span class="nav-icon">📞</span> Support</a>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar" id="sidebar-avatar">?</div>
+        <div>
+          <div class="sidebar-user-name" id="sidebar-name">Loading...</div>
+          <div class="sidebar-user-role">Member</div>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm btn-block mt-1" onclick="logout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="page-header flex-between">
+      <div>
+        <h1 class="page-title">Achievements 🏆</h1>
+        <p class="page-subtitle">Earn badges as you hit smoke-free milestones</p>
+      </div>
+      <div id="unlocked-count" class="badge badge-purple" style="font-size:14px;padding:8px 16px;">0 Unlocked</div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="card mb-3">
+      <div class="flex-between mb-1">
+        <span style="font-size:13px;color:var(--text-secondary);">Overall Progress</span>
+        <span id="progress-text" style="font-size:13px;font-weight:600;">0 / 0</span>
+      </div>
+      <div style="background:rgba(255,255,255,0.06);border-radius:999px;height:10px;overflow:hidden;">
+        <div id="ach-progress-bar" style="height:100%;border-radius:999px;background:var(--gradient-primary);transition:width 1s ease;width:0%;"></div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading"><div class="spinner"></div></div>
+
+    <!-- Badge Grid -->
+    <div id="achievements-grid" class="grid-3 hidden"></div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="hidden">
+      <div class="empty-state">
+        <div class="empty-state-icon">🏅</div>
+        <h3>No achievements yet</h3>
+        <p>Keep going — your first badge is just a day away!</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/js/achievements.js"></script>
+<script src="/js/pwa.js"></script>
+</body>
+</html>

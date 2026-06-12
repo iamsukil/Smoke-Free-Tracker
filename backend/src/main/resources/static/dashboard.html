@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Smoke-Free Tracker Dashboard — Track your smoke-free time with a live timer and progress stats."/>
+  <title>Dashboard | Smoke-Free Tracker</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <meta name="theme-color" content="#7C3AED"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="SmokeFree"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+  <style>
+    /* ── Quit Time Counter ─────────────────────────────────────────── */
+    .quit-time-section {
+      margin-bottom: 28px;
+    }
+    .quit-time-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .quit-time-grid {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .quit-time-box {
+      background: rgba(108, 99, 255, 0.08);
+      border: 1px solid rgba(108, 99, 255, 0.2);
+      border-radius: 16px;
+      padding: 20px 24px;
+      text-align: center;
+      min-width: 100px;
+      backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .quit-time-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--gradient-primary);
+    }
+    .quit-time-box:hover {
+      border-color: rgba(108, 99, 255, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(108, 99, 255, 0.2);
+    }
+    .quit-time-digits {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 38px;
+      font-weight: 800;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      letter-spacing: -1px;
+      min-width: 2ch;
+      display: inline-block;
+    }
+    .quit-time-unit {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 6px;
+    }
+    .quit-time-separator {
+      display: flex;
+      align-items: center;
+      font-size: 28px;
+      font-weight: 800;
+      color: rgba(108, 99, 255, 0.35);
+      padding-bottom: 22px;
+      align-self: center;
+    }
+    /* ── Profile Setup Banner (shown when no quit date) ─────────────── */
+    .setup-banner {
+      background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(168,85,247,0.1));
+      border: 1px solid rgba(108,99,255,0.3);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .setup-banner-icon { font-size: 36px; }
+    .setup-banner-text h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .setup-banner-text p  { font-size: 13px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Mobile hamburger + overlay -->
+  <button class="hamburger-btn" id="hamburger-btn" aria-label="Open navigation" onclick="toggleSidebar()">☰</button>
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <a href="/dashboard.html" class="sidebar-logo">
+      <div class="sidebar-logo-icon">🚭</div>
+      <div class="sidebar-logo-text">Smoke-Free<br>Tracker</div>
+    </a>
+
+    <span class="nav-section-label">Main</span>
+    <a href="/dashboard.html"    class="nav-link active"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="/health.html"       class="nav-link"><span class="nav-icon">❤️</span> Health Timeline</a>
+    <a href="/achievements.html" class="nav-link"><span class="nav-icon">🏆</span> Achievements</a>
+    <a href="/cravings.html"     class="nav-link"><span class="nav-icon">📈</span> Cravings</a>
+    <a href="/progress.html"     class="nav-link"><span class="nav-icon">📉</span> Progress</a>
+
+    <span class="nav-section-label">Community</span>
+    <a href="/community.html"    class="nav-link"><span class="nav-icon">💬</span> Community</a>
+    <a href="/support.html"      class="nav-link"><span class="nav-icon">📞</span> Support</a>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar" id="sidebar-avatar">?</div>
+        <div>
+          <div class="sidebar-user-name" id="sidebar-name">Loading...</div>
+          <div class="sidebar-user-role">Member</div>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm btn-block mt-1" onclick="logout()" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="page-header flex-between">
+      <div>
+        <h1 class="page-title">Dashboard 📊</h1>
+        <p class="page-subtitle" id="days-message">Welcome back! Here's your progress.</p>
+      </div>
+      <div id="streak-badge" class="badge badge-success hidden">🔥 On a streak!</div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading"><div class="spinner"></div></div>
+
+    <!-- Stats Grid -->
+    <div id="stats-container" class="hidden">
+
+      <!-- Profile setup banner — shown until quit date is configured -->
+      <div id="setup-banner" class="setup-banner hidden">
+        <div class="setup-banner-icon">⚙️</div>
+        <div class="setup-banner-text">
+          <h3>Set up your quit profile</h3>
+          <p>Enter your quit date and smoking details below to start tracking your progress.</p>
+        </div>
+      </div>
+
+      <!-- ═══ Quit Time Counter ════════════════════════════════════════════ -->
+      <div class="quit-time-section" id="quit-time-section">
+        <p class="quit-time-label">⏱ Quit Time Counter</p>
+        <div class="quit-time-grid">
+          <div class="quit-time-box">
+            <div class="quit-time-digits" id="qt-days">--</div>
+            <div class="quit-time-unit">Days</div>
+          </div>
+          <div class="quit-time-separator">:</div>
+          <div class="quit-time-box">
+            <div class="quit-time-digits" id="qt-hours">--</div>
+            <div class="quit-time-unit">Hours</div>
+          </div>
+          <div class="quit-time-separator">:</div>
+          <div class="quit-time-box">
+            <div class="quit-time-digits" id="qt-minutes">--</div>
+            <div class="quit-time-unit">Minutes</div>
+          </div>
+          <div class="quit-time-separator">:</div>
+          <div class="quit-time-box">
+            <div class="quit-time-digits" id="qt-seconds">--</div>
+            <div class="quit-time-unit">Seconds</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Stats -->
+      <div class="grid-4 mb-3" id="stat-cards">
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-value" id="stat-days">0</div>
+          <div class="stat-label">Days Smoke-Free</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon green">🚬</div>
+          <div class="stat-value green" id="stat-cigs">0</div>
+          <div class="stat-label">Cigarettes Avoided</div>
+        </div>
+        <div class="stat-card warm">
+          <div class="stat-icon warm">💰</div>
+          <div class="stat-value warm" id="stat-money">₹0</div>
+          <div class="stat-label">Money Saved</div>
+        </div>
+        <div class="stat-card cool">
+          <div class="stat-icon cool">⏱️</div>
+          <div class="stat-value" id="stat-life">0</div>
+          <div class="stat-label">Minutes of Life Regained</div>
+        </div>
+      </div>
+
+      <!-- Secondary Stats -->
+      <div class="grid-2 mb-3">
+        <div class="card">
+          <div class="flex-between mb-2">
+            <h3 style="font-size:16px;font-weight:600;">🏆 Achievements</h3>
+            <a href="/achievements.html" class="badge badge-purple">View All →</a>
+          </div>
+          <div class="flex-between">
+            <span class="text-muted" style="font-size:13px;">Unlocked</span>
+            <span style="font-size:22px;font-weight:800;color:var(--accent-primary);" id="ach-count">0/0</span>
+          </div>
+          <div class="mt-2" style="background:rgba(255,255,255,0.06);border-radius:999px;height:6px;overflow:hidden;">
+            <div id="ach-bar" style="height:100%;border-radius:999px;background:var(--gradient-primary);transition:width 0.8s ease;width:0%;"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="flex-between mb-2">
+            <h3 style="font-size:16px;font-weight:600;">❤️ Health Milestones</h3>
+            <a href="/health.html" class="badge badge-success">View All →</a>
+          </div>
+          <div class="flex-between">
+            <span class="text-muted" style="font-size:13px;">Reached</span>
+            <span style="font-size:22px;font-weight:800;color:var(--accent-green);" id="ms-count">0/0</span>
+          </div>
+          <div class="mt-2" style="background:rgba(255,255,255,0.06);border-radius:999px;height:6px;overflow:hidden;">
+            <div id="ms-bar" style="height:100%;border-radius:999px;background:var(--gradient-green);transition:width 0.8s ease;width:0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ⚙️ Profile Setup / Update Quit Info -->
+      <div class="card">
+        <h3 style="font-size:16px;font-weight:600;margin-bottom:4px;">⚙️ Update Your Quit Info</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">
+          Set or update your quit date and smoking details to track your progress accurately.
+        </p>
+        <div id="update-alert"></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;align-items:end;">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" for="upd-quit-date">Quit Date</label>
+            <input class="form-input" type="date" id="upd-quit-date"/>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" for="upd-quit-time">Quit Time</label>
+            <input class="form-input" type="time" id="upd-quit-time"/>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" for="upd-cigs">Cigarettes/Day</label>
+            <input class="form-input" type="number" id="upd-cigs" min="1"/>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" for="upd-cost">Cost/Pack (₹)</label>
+            <input class="form-input" type="number" id="upd-cost" step="0.01" min="0"/>
+          </div>
+          <button class="btn btn-success" onclick="updateQuitInfo()" id="save-quit-btn">Save Changes</button>
+        </div>
+      </div>
+
+    </div><!-- /stats-container -->
+
+    <!-- Not-logged-in notice -->
+    <div id="error-state" class="hidden">
+      <div class="empty-state">
+        <div class="empty-state-icon">🔒</div>
+        <h3>Session Expired</h3>
+        <p>Please <a href="/index.html" style="color:var(--accent-primary);">sign in</a> again.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/js/dashboard.js"></script>
+<script src="/js/pwa.js"></script>
+</body>
+</html>

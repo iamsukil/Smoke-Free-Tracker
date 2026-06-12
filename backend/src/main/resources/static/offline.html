@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#7C3AED"/>
+  <title>Offline | Smoke-Free Tracker</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 24px;
+    }
+    .offline-container {
+      max-width: 420px;
+      width: 100%;
+    }
+    .offline-icon {
+      font-size: 80px;
+      display: block;
+      margin-bottom: 24px;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-12px); }
+    }
+    .offline-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #6c63ff, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+    .offline-subtitle {
+      color: rgba(240,244,255,0.55);
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+    .offline-tips {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 20px 24px;
+      text-align: left;
+      margin-bottom: 28px;
+    }
+    .offline-tips h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #a855f7;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .offline-tips li {
+      font-size: 13px;
+      color: rgba(240,244,255,0.6);
+      padding: 5px 0;
+      padding-left: 20px;
+      position: relative;
+      list-style: none;
+    }
+    .offline-tips li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: #6c63ff;
+    }
+    .retry-btn {
+      background: linear-gradient(135deg, #6c63ff, #a855f7);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 32px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 20px rgba(108,99,255,0.35);
+      width: 100%;
+    }
+    .retry-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(108,99,255,0.5);
+    }
+    .offline-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(239,68,68,0.12);
+      border: 1px solid rgba(239,68,68,0.25);
+      color: #f87171;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .offline-dot {
+      width: 7px;
+      height: 7px;
+      background: #ef4444;
+      border-radius: 50%;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.8); }
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <span class="offline-icon">📡</span>
+
+    <div class="offline-badge">
+      <span class="offline-dot"></span>
+      No Internet Connection
+    </div>
+
+    <h1 class="offline-title">You're Offline</h1>
+    <p class="offline-subtitle">
+      Don't worry — your smoke-free streak is still counting!<br>
+      Reconnect to sync your progress and achievements.
+    </p>
+
+    <div class="offline-tips">
+      <h3>💡 While You're Offline</h3>
+      <ul>
+        <li>Your local data is still saved</li>
+        <li>The app will sync when you're back online</li>
+        <li>Your streak continues running in the background</li>
+        <li>Log cravings once connected again</li>
+      </ul>
+    </div>
+
+    <button class="retry-btn" onclick="retryConnection()">
+      🔄 Retry Connection
+    </button>
+  </div>
+
+  <script>
+    function retryConnection() {
+      window.location.reload();
+    }
+
+    // Auto-retry every 10 seconds
+    window.addEventListener('online', () => {
+      window.location.href = '/dashboard.html';
+    });
+  </script>
+</body>
+</html>
