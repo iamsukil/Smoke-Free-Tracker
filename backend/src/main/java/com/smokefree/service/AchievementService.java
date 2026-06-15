@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
@@ -82,8 +81,8 @@ public class AchievementService {
         }
 
         // Milestones – use new Double-keyed definitions
-        double minutesFree = user.getQuitDate() != null
-                ? ChronoUnit.MINUTES.between(user.getQuitDate().atStartOfDay(), LocalDateTime.now())
+        double minutesFree = user.getQuitDateTime() != null
+                ? ChronoUnit.MINUTES.between(user.getQuitDateTime(), LocalDateTime.now())
                 : -1;
 
         for (Map.Entry<String, Double> entry : MILESTONE_DEFINITIONS.entrySet()) {
@@ -97,8 +96,8 @@ public class AchievementService {
                 boolean reached = minutesFree >= 0 && hoursElapsed >= entry.getValue();
                 m.setIsReached(reached);
                 if (reached) {
-                    // back-calculate when milestone was first reached relative to quit date
-                    m.setReachedAt(user.getQuitDate().atStartOfDay()
+                    // back-calculate when milestone was first reached relative to quit datetime
+                    m.setReachedAt(user.getQuitDateTime()
                             .plusMinutes((long) (entry.getValue() * 60)));
                 }
                 healthMilestoneRepository.save(m);
@@ -107,8 +106,8 @@ public class AchievementService {
     }
 
     public void checkAndUnlockAchievements(User user) {
-        if (user.getQuitDate() == null) return;
-        long daysFree = ChronoUnit.DAYS.between(user.getQuitDate(), LocalDate.now());
+        if (user.getQuitDateTime() == null) return;
+        long daysFree = ChronoUnit.DAYS.between(user.getQuitDateTime().toLocalDate(), java.time.LocalDate.now());
         if (daysFree < 0) return;
 
         List<Achievement> achievements = achievementRepository.findByUser(user);
@@ -123,11 +122,11 @@ public class AchievementService {
     }
 
     public void checkAndUnlockMilestones(User user) {
-        if (user.getQuitDate() == null) return;
+        if (user.getQuitDateTime() == null) return;
 
         // Use minutes for precision so 0.33-hour (20-min) milestone works correctly
         double minutesFree = ChronoUnit.MINUTES.between(
-                user.getQuitDate().atStartOfDay(), LocalDateTime.now());
+                user.getQuitDateTime(), LocalDateTime.now());
         double hoursFreeDouble = minutesFree / 60.0;
         if (hoursFreeDouble < 0) return;
 

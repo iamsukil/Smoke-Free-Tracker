@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 @Service
@@ -21,28 +22,29 @@ public class ProgressService {
     private HealthMilestoneRepository healthMilestoneRepository;
 
     public ProgressDTO calculateProgress(User user) {
-        if (user.getQuitDate() == null) {
+        if (user.getQuitDateTime() == null) {
             return new ProgressDTO(0L, 0L, 0.0, null,
-                    user.getCigsPerDay(), user.getCostPerPack());
+                    user.getCigsPerDay(), user.getCostPerCigarette());
         }
 
-        long daysFree = ChronoUnit.DAYS.between(user.getQuitDate(), LocalDate.now());
+        LocalDate quitDate = user.getQuitDateTime().toLocalDate();
+        long daysFree = ChronoUnit.DAYS.between(quitDate, LocalDate.now());
         if (daysFree < 0) daysFree = 0;
 
         int cigsPerDay = user.getCigsPerDay() != null ? user.getCigsPerDay() : 0;
-        double costPerPack = user.getCostPerPack() != null ? user.getCostPerPack() : 0.0;
+        double costPerCig = user.getCostPerCigarette() != null ? user.getCostPerCigarette() : 0.0;
 
         long cigarettesAvoided = daysFree * cigsPerDay;
-        // 20 cigarettes per pack
-        double moneySaved = (cigarettesAvoided / 20.0) * costPerPack;
+        // Direct calculation: cigarettes avoided × cost per cigarette
+        double moneySaved = cigarettesAvoided * costPerCig;
 
         return new ProgressDTO(
                 daysFree,
                 cigarettesAvoided,
                 Math.round(moneySaved * 100.0) / 100.0,
-                user.getQuitDate() != null ? user.getQuitDate().toString() : null,
+                quitDate.toString(),
                 cigsPerDay,
-                costPerPack
+                costPerCig
         );
     }
 

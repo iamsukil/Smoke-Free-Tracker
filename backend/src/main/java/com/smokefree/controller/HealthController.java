@@ -35,9 +35,9 @@ public class HealthController {
 
         // Use minutes for sub-hour precision
         double minutesFree = 0;
-        if (user.getQuitDate() != null) {
+        if (user.getQuitDateTime() != null) {
             minutesFree = ChronoUnit.MINUTES.between(
-                    user.getQuitDate().atStartOfDay(), LocalDateTime.now());
+                    user.getQuitDateTime(), LocalDateTime.now());
         }
         final double hoursFree = minutesFree / 60.0;
 
@@ -69,12 +69,12 @@ public class HealthController {
     public ResponseEntity<?> getNextMilestone(Authentication auth) {
         User user = userService.findByEmail(auth.getName());
 
-        if (user.getQuitDate() == null) {
+        if (user.getQuitDateTime() == null) {
             return ResponseEntity.ok(Map.of("message", "No quit date set"));
         }
 
         double minutesFree = ChronoUnit.MINUTES.between(
-                user.getQuitDate().atStartOfDay(), LocalDateTime.now());
+                user.getQuitDateTime(), LocalDateTime.now());
         double hoursFree = minutesFree / 60.0;
 
         List<HealthMilestone> unReached =

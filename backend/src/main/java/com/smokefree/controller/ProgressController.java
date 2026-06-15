@@ -11,6 +11,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -48,9 +50,7 @@ public class ProgressController {
         User user = userService.findByEmail(auth.getName());
 
         int cigsPerDay   = user.getCigsPerDay()   != null ? user.getCigsPerDay()   : 0;
-        double costPack  = user.getCostPerPack()   != null ? user.getCostPerPack()  : 0.0;
-        // 20 cigarettes per pack
-        double costPerCig = costPack / 20.0;
+        double costPerCig = user.getCostPerCigarette() != null ? user.getCostPerCigarette() : 0.0;
         // 6 minutes of life per cigarette avoided
         long minPerCig = 6;
 
@@ -105,14 +105,20 @@ public class ProgressController {
                                              Authentication auth) {
         try {
             User user = userService.findByEmail(auth.getName());
-            String quitDateStr = body.get("quitDate");
-            user.setQuitDate(LocalDate.parse(quitDateStr));
+
+            String quitDateStr = body.get("quitDate");   // e.g. "2026-06-15"
+            String quitTimeStr = body.getOrDefault("quitTime", "00:00"); // e.g. "15:33" (24-hr)
+
+            // Combine date + time into a single LocalDateTime (no timezone — stored as local wall-clock)
+            LocalDate date = LocalDate.parse(quitDateStr);
+            LocalTime time = LocalTime.parse(quitTimeStr); // HH:MM or HH:MM:SS
+            user.setQuitDateTime(date.atTime(time));
 
             if (body.containsKey("cigsPerDay")) {
                 user.setCigsPerDay(Integer.parseInt(body.get("cigsPerDay")));
             }
-            if (body.containsKey("costPerPack")) {
-                user.setCostPerPack(Double.parseDouble(body.get("costPerPack")));
+            if (body.containsKey("costPerCigarette")) {
+                user.setCostPerCigarette(Double.parseDouble(body.get("costPerCigarette")));
             }
 
             userService.updateUser(user);
@@ -125,12 +131,14 @@ public class ProgressController {
     @GetMapping("/user/profile")
     public ResponseEntity<?> getProfile(Authentication auth) {
         User user = userService.findByEmail(auth.getName());
+        // Return full ISO-8601 datetime string (e.g. "2026-06-15T15:33:00") so the
+        // frontend can always restore the exact saved quit time after a page refresh.
         return ResponseEntity.ok(Map.of(
                 "name",        user.getName(),
                 "email",       user.getEmail(),
-                "quitDate",    user.getQuitDate()    != null ? user.getQuitDate().toString() : "",
-                "cigsPerDay",  user.getCigsPerDay()  != null ? user.getCigsPerDay()  : 0,
-                "costPerPack", user.getCostPerPack() != null ? user.getCostPerPack() : 0.0
+                "quitDate",    user.getQuitDateTime() != null ? user.getQuitDateTime().toString() : "",
+                "cigsPerDay",  user.getCigsPerDay()   != null ? user.getCigsPerDay()   : 0,
+                "costPerCigarette", user.getCostPerCigarette() != null ? user.getCostPerCigarette() : 0.0
         ));
     }
 

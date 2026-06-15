@@ -3,14 +3,14 @@
 // Strategy: Cache-First for static assets, Network-First for API
 // ============================================================
 
-const CACHE_NAME    = 'smokefree-v2';
+const CACHE_NAME    = 'smokefree-v3';
 const OFFLINE_URL   = '/offline.html';
 
 // All static assets to pre-cache on install
 const PRECACHE_URLS = [
   '/',
   '/index.html',
-  '/dashboard.html',
+  // '/dashboard.html', // Removed for development to prevent stale UI
   '/achievements.html',
   '/health.html',
   '/cravings.html',
@@ -21,7 +21,7 @@ const PRECACHE_URLS = [
   '/manifest.json',
   '/css/style.css',
   '/js/auth.js',
-  '/js/dashboard.js',
+  // '/js/dashboard.js', // Removed for development to prevent stale UI
   '/js/achievements.js',
   '/js/health.js',
   '/js/cravings.js',

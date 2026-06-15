@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -29,13 +28,13 @@ public class User {
     private String password;
 
     @Column(name = "quit_date")
-    private LocalDate quitDate;
+    private LocalDateTime quitDateTime;
 
     @Column(name = "cigs_per_day")
     private Integer cigsPerDay;
 
-    @Column(name = "cost_per_pack")
-    private Double costPerPack;
+    @Column(name = "cost_per_cig")
+    private Double costPerCigarette;
 
     @Column(nullable = false)
     private String role = "USER";

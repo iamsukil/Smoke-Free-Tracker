@@ -13,5 +13,5 @@ public class ProgressDTO {
     private Double moneySaved;
     private String quitDate;
     private Integer cigsPerDay;
-    private Double costPerPack;
+    private Double costPerCigarette;
 }

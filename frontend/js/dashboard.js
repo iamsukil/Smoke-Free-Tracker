@@ -15,13 +15,85 @@ const storedName = localStorage.getItem('userName') || 'User';
 document.getElementById('sidebar-name').textContent = storedName;
 document.getElementById('sidebar-avatar').textContent = storedName.charAt(0).toUpperCase();
 
+// ─── Custom AM/PM Time Picker ──────────────────────────────────────────────────────
+/**
+ * Populate hour (01–12) and minute (00–59) selects, then default to
+ * the browser’s current local time so the picker always looks live.
+ * Called once at page load BEFORE loadProfile() so the options exist
+ * when setTimePicker() tries to set their values.
+ */
+function initTimePicker() {
+    const hourSel = document.getElementById('tp-hour');
+    const minSel  = document.getElementById('tp-minute');
+    for (let h = 1; h <= 12; h++) {
+        const o = document.createElement('option');
+        o.value = String(h).padStart(2, '0');
+        o.textContent = String(h).padStart(2, '0');
+        hourSel.appendChild(o);
+    }
+    for (let m = 0; m < 60; m++) {
+        const o = document.createElement('option');
+        o.value = String(m).padStart(2, '0');
+        o.textContent = String(m).padStart(2, '0');
+        minSel.appendChild(o);
+    }
+    // Default display to current local time
+    const now = new Date();
+    setTimePicker(
+        String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0')
+    );
+}
+
+/**
+ * Read the three picker controls and return an unambiguous 24-hour "HH:MM" string.
+ * This is what gets sent to the backend — no AM/PM ambiguity possible.
+ */
+function get24HourTime() {
+    const h    = parseInt(document.getElementById('tp-hour').value, 10);
+    const m    = document.getElementById('tp-minute').value;
+    const isAm = document.getElementById('ampm-am').classList.contains('active');
+    let h24;
+    if (isAm) {
+        h24 = (h === 12) ? 0 : h;          // 12 AM → 00, others as-is
+    } else {
+        h24 = (h === 12) ? 12 : h + 12;    // 12 PM → 12, 1 PM → 13 … 11 PM → 23
+    }
+    return String(h24).padStart(2, '0') + ':' + m;
+}
+
+/**
+ * Restore the picker from a 24-hour "HH:MM" string (e.g. "13:52" from the backend).
+ * Correctly maps 13:52 → 01:52 PM, 00:30 → 12:30 AM, etc.
+ */
+function setTimePicker(hh24) {
+    if (!hh24 || !hh24.includes(':')) return;
+    const [hStr, mStr] = hh24.split(':');
+    const h24   = parseInt(hStr, 10);
+    const minute = mStr.substring(0, 2);
+    const isAm  = h24 < 12;
+    let h12     = h24 % 12;
+    if (h12 === 0) h12 = 12;  // midnight (0) and noon (12) both display as 12
+    document.getElementById('tp-hour').value   = String(h12).padStart(2, '0');
+    document.getElementById('tp-minute').value = minute;
+    setAmPm(isAm ? 'AM' : 'PM');
+}
+
+/** Toggle the AM/PM highlight button */
+function setAmPm(period) {
+    document.getElementById('ampm-am').classList.toggle('active', period === 'AM');
+    document.getElementById('ampm-pm').classList.toggle('active', period === 'PM');
+}
+
 // ─── Quit Time Counter ─────────────────────────────────────────────────────
 let quitTimerInterval = null;
 let quitDateTimeGlobal = null; // ISO datetime string "YYYY-MM-DDTHH:MM:SS"
 
 function startQuitTimer(quitDate, quitTime) {
     if (!quitDate) return;
-    // Combine date + time (default to midnight if no time set)
+    // Combine date + time. The HTML <input type="time"> always returns 24-hour HH:MM,
+    // and the backend stores/returns local wall-clock time with no timezone offset.
+    // Constructing "YYYY-MM-DDTHH:MM:SS" (no "Z") makes new Date() treat it as
+    // local time — which is exactly what we want.
     const timeStr = quitTime || '00:00:00';
     quitDateTimeGlobal = quitDate + 'T' + (timeStr.length === 5 ? timeStr + ':00' : timeStr);
 
@@ -82,32 +154,29 @@ function animateCount(el, target, prefix = '', suffix = '', decimals = 0) {
     requestAnimationFrame(update);
 }
 
-// ─── Load Profile (prefills form + starts timer) ───────────────────────────
+// ─── Load Profile (prefills form + starts timer) ──────────────────────────────
 async function loadProfile() {
     try {
         const res = await fetch('/api/user/profile', { headers: authHeaders() });
         if (!res.ok) return;
         const p = await res.json();
 
-        // Pre-fill update form
-        document.getElementById('upd-quit-date').value = p.quitDate   || '';
-        document.getElementById('upd-cigs').value      = p.cigsPerDay  || '';
-        document.getElementById('upd-cost').value      = p.costPerPack || '';
-
-        // Extract time from quitDate if it has a time component (ISO 8601)
-        // Otherwise default to 00:00
         if (p.quitDate) {
-            const hasTime = p.quitDate.includes('T');
-            if (hasTime) {
-                const timePart = p.quitDate.split('T')[1].substring(0, 5);
-                document.getElementById('upd-quit-time').value = timePart;
-                startQuitTimer(p.quitDate.split('T')[0], timePart);
-            } else {
-                document.getElementById('upd-quit-time').value = '00:00';
-                startQuitTimer(p.quitDate, '00:00');
-            }
+            // Backend returns full ISO-8601 local datetime, e.g. "2026-06-15T13:52:00".
+            // Split on "T" to get the date and 24-hour time parts separately.
+            const hasTime  = p.quitDate.includes('T');
+            const datePart = hasTime ? p.quitDate.split('T')[0] : p.quitDate;
+            const timePart = hasTime ? p.quitDate.split('T')[1].substring(0, 5) : '12:00'; // HH:MM 24-hr
+
+            document.getElementById('upd-quit-date').value = datePart;
+            setTimePicker(timePart);  // ← restores hour/minute/AM-PM selects exactly
+            document.getElementById('upd-cigs').value = p.cigsPerDay        || '';
+            document.getElementById('upd-cost').value = p.costPerCigarette  || '';
+
+            startQuitTimer(datePart, timePart);
         } else {
-            // No quit date yet — show setup banner
+            document.getElementById('upd-cigs').value = p.cigsPerDay        || '';
+            document.getElementById('upd-cost').value = p.costPerCigarette  || '';
             showEl('setup-banner');
         }
     } catch (err) {
@@ -198,12 +267,14 @@ async function loadStats() {
     }
 }
 
-// ─── Update Quit Info ────────────────────────────────────────────────────────
+// ─── Update Quit Info ────────────────────────────────────────────────────────────
 async function updateQuitInfo() {
-    const quitDate    = document.getElementById('upd-quit-date').value;
-    const quitTime    = document.getElementById('upd-quit-time').value || '00:00';
-    const cigsPerDay  = document.getElementById('upd-cigs').value;
-    const costPerPack = document.getElementById('upd-cost').value;
+    const quitDate         = document.getElementById('upd-quit-date').value;
+    // get24HourTime() reads the explicit Hour / Minute / AM-PM selects and returns
+    // a 24-hour "HH:MM" string — e.g. selecting 1:52 PM reliably gives "13:52".
+    const quitTime         = get24HourTime();
+    const cigsPerDay       = document.getElementById('upd-cigs').value;
+    const costPerCigarette = document.getElementById('upd-cost').value;
 
     if (!quitDate) { showUpdateAlert('Please set a quit date.', 'danger'); return; }
 
@@ -214,16 +285,14 @@ async function updateQuitInfo() {
             body: JSON.stringify({
                 quitDate,
                 quitTime,
-                cigsPerDay: cigsPerDay.toString(),
-                costPerPack: costPerPack.toString()
+                cigsPerDay:       cigsPerDay.toString(),
+                costPerCigarette: costPerCigarette.toString()
             })
         });
         const data = await res.json();
         if (res.ok) {
             showUpdateAlert('✅ ' + data.message, 'success');
-            // Hide setup banner since user has now set their info
             hideEl('setup-banner');
-            // Restart timer with new date + time
             startQuitTimer(quitDate, quitTime);
             setTimeout(loadStats, 600);
         } else {
@@ -240,6 +309,7 @@ function showUpdateAlert(msg, type) {
     setTimeout(() => el.innerHTML = '', 3500);
 }
 
-// ─── Init ─────────────────────────────────────────────────────────────────
-loadProfile(); // starts timer + prefills form
+// ─── Init ─────────────────────────────────────────────────────────────────────
+initTimePicker(); // MUST run first: populates <select> options before loadProfile()
+loadProfile();     // fetches saved time → calls setTimePicker() to restore picker
 loadStats();

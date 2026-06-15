@@ -100,6 +100,78 @@
     .setup-banner-icon { font-size: 36px; }
     .setup-banner-text h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
     .setup-banner-text p  { font-size: 13px; color: var(--text-muted); }
+    /* ── Custom AM/PM Time Picker ──────────────────────────────────── */
+    .time-picker {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 9px 12px;
+      transition: border-color 0.2s;
+      cursor: default;
+    }
+    .time-picker:focus-within {
+      border-color: rgba(108,99,255,0.55);
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.12);
+    }
+    .time-sel {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      border: none;
+      color: var(--text-primary, #e2e8f0);
+      font-size: 18px;
+      font-weight: 700;
+      font-family: 'Space Grotesk', monospace;
+      outline: none;
+      cursor: pointer;
+      width: 38px;
+      text-align: center;
+      text-align-last: center;
+    }
+    .time-sel option {
+      background: #1e1b4b;
+      color: #e2e8f0;
+      font-weight: 600;
+    }
+    .time-colon {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-muted);
+      line-height: 1;
+      user-select: none;
+      padding: 0 2px;
+    }
+    .ampm-toggle {
+      display: flex;
+      border: 1px solid rgba(108,99,255,0.35);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-left: 8px;
+      flex-shrink: 0;
+    }
+    .ampm-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 5px 9px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      line-height: 1;
+    }
+    .ampm-btn.active {
+      background: var(--accent-primary, #7c3aed);
+      color: #fff;
+    }
+    .ampm-btn:not(.active):hover {
+      background: rgba(108,99,255,0.15);
+      color: var(--text-primary, #e2e8f0);
+    }
   </style>
 </head>
 <body>
@@ -258,16 +330,26 @@
             <input class="form-input" type="date" id="upd-quit-date"/>
           </div>
           <div class="form-group" style="margin:0;">
-            <label class="form-label" for="upd-quit-time">Quit Time</label>
-            <input class="form-input" type="time" id="upd-quit-time"/>
+            <label class="form-label">Quit Time</label>
+            <!-- Custom AM/PM picker — avoids the native 12-hr spinner
+                 that lets users accidentally leave AM selected when they mean PM -->
+            <div class="time-picker" id="quit-time-picker">
+              <select class="time-sel" id="tp-hour"  aria-label="Hour"></select>
+              <span  class="time-colon">:</span>
+              <select class="time-sel" id="tp-minute" aria-label="Minute"></select>
+              <div class="ampm-toggle">
+                <button type="button" class="ampm-btn" id="ampm-am" onclick="setAmPm('AM')">AM</button>
+                <button type="button" class="ampm-btn" id="ampm-pm" onclick="setAmPm('PM')">PM</button>
+              </div>
+            </div>
           </div>
           <div class="form-group" style="margin:0;">
             <label class="form-label" for="upd-cigs">Cigarettes/Day</label>
             <input class="form-input" type="number" id="upd-cigs" min="1"/>
           </div>
           <div class="form-group" style="margin:0;">
-            <label class="form-label" for="upd-cost">Cost/Pack (₹)</label>
-            <input class="form-input" type="number" id="upd-cost" step="0.01" min="0"/>
+            <label class="form-label" for="upd-cost">Cost Per Cigarette (₹)</label>
+            <input class="form-input" type="number" id="upd-cost" step="0.01" min="0" placeholder="e.g. 15"/>
           </div>
           <button class="btn btn-success" onclick="updateQuitInfo()" id="save-quit-btn">Save Changes</button>
         </div>

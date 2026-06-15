@@ -62,8 +62,8 @@ public class DataInitializer implements ApplicationRunner {
         // Wipe and re-create
         healthMilestoneRepository.deleteAll(existing);
 
-        double minutesFree = user.getQuitDate() != null
-                ? ChronoUnit.MINUTES.between(user.getQuitDate().atStartOfDay(), LocalDateTime.now())
+        double minutesFree = user.getQuitDateTime() != null
+                ? ChronoUnit.MINUTES.between(user.getQuitDateTime(), LocalDateTime.now())
                 : -1;
 
         for (Map.Entry<String, Double> entry : AchievementService.MILESTONE_DEFINITIONS.entrySet()) {
@@ -77,7 +77,7 @@ public class DataInitializer implements ApplicationRunner {
             boolean reached = minutesFree >= 0 && hoursElapsed >= entry.getValue();
             m.setIsReached(reached);
             if (reached) {
-                m.setReachedAt(user.getQuitDate().atStartOfDay()
+                m.setReachedAt(user.getQuitDateTime()
                         .plusMinutes((long) (entry.getValue() * 60)));
             }
             healthMilestoneRepository.save(m);
@@ -87,15 +87,15 @@ public class DataInitializer implements ApplicationRunner {
     }
 
     private void recalculateReached(User user, List<HealthMilestone> milestones) {
-        if (user.getQuitDate() == null) return;
+        if (user.getQuitDateTime() == null) return;
         double minutesFree = ChronoUnit.MINUTES.between(
-                user.getQuitDate().atStartOfDay(), LocalDateTime.now());
+                user.getQuitDateTime(), LocalDateTime.now());
         double hoursElapsed = minutesFree / 60.0;
 
         for (HealthMilestone m : milestones) {
             if (!m.getIsReached() && hoursElapsed >= m.getHoursRequired()) {
                 m.setIsReached(true);
-                m.setReachedAt(user.getQuitDate().atStartOfDay()
+                m.setReachedAt(user.getQuitDateTime()
                         .plusMinutes((long) (m.getHoursRequired() * 60)));
                 healthMilestoneRepository.save(m);
             }
