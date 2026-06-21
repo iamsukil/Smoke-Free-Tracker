@@ -27,22 +27,27 @@ public class ProgressService {
                     user.getCigsPerDay(), user.getCostPerCigarette());
         }
 
-        LocalDate quitDate = user.getQuitDateTime().toLocalDate();
-        long daysFree = ChronoUnit.DAYS.between(quitDate, LocalDate.now());
-        if (daysFree < 0) daysFree = 0;
+        // Use full LocalDateTime for precision — "1 completed day" = 24 hours
+        // from the exact quit time, NOT midnight-to-midnight.
+        // Example: quit at 2026-06-21T14:45 → day 1 starts at 2026-06-22T14:45.
+        LocalDateTime quitDateTime = user.getQuitDateTime();
+        long hoursElapsed = ChronoUnit.HOURS.between(quitDateTime, LocalDateTime.now());
+        if (hoursElapsed < 0) hoursElapsed = 0;
+
+        long completedDays = hoursElapsed / 24;  // whole days only
 
         int cigsPerDay = user.getCigsPerDay() != null ? user.getCigsPerDay() : 0;
         double costPerCig = user.getCostPerCigarette() != null ? user.getCostPerCigarette() : 0.0;
 
-        long cigarettesAvoided = daysFree * cigsPerDay;
-        // Direct calculation: cigarettes avoided × cost per cigarette
+        // Day-based only — no fractional cigarettes
+        long cigarettesAvoided = completedDays * cigsPerDay;
         double moneySaved = cigarettesAvoided * costPerCig;
 
         return new ProgressDTO(
-                daysFree,
+                completedDays,
                 cigarettesAvoided,
                 Math.round(moneySaved * 100.0) / 100.0,
-                quitDate.toString(),
+                quitDateTime.toLocalDate().toString(),
                 cigsPerDay,
                 costPerCig
         );
@@ -51,8 +56,10 @@ public class ProgressService {
     public StatsDTO calculateStats(User user) {
         ProgressDTO progress = calculateProgress(user);
 
+        // hoursFree for display — derived from completedDays
         long hoursFree = progress.getDaysFree() * 24;
-        // Each cigarette takes ~11 minutes off your life
+
+        // Each cigarette takes ~11 minutes off your life (day-based)
         long minutesRegained = progress.getCigarettesAvoided() * 11;
 
         int unlockedAchievements = achievementRepository

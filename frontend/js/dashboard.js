@@ -96,6 +96,9 @@ function startQuitTimer(quitDate, quitTime) {
     // local time — which is exactly what we want.
     const timeStr = quitTime || '00:00:00';
     quitDateTimeGlobal = quitDate + 'T' + (timeStr.length === 5 ? timeStr + ':00' : timeStr);
+    console.log('[startQuitTimer] quitDateTimeGlobal =', quitDateTimeGlobal);
+    console.log('[startQuitTimer] parsed as Date =', new Date(quitDateTimeGlobal).toString());
+    console.log('[startQuitTimer] current time   =', new Date().toString());
 
     if (quitTimerInterval) clearInterval(quitTimerInterval);
     updateQuitTimer();
@@ -108,6 +111,13 @@ function updateQuitTimer() {
     const quitDT     = new Date(quitDateTimeGlobal);
     const now        = new Date();
     const diffMs     = now - quitDT;
+
+    // Log once per minute to avoid console spam (when seconds === 0)
+    if (now.getSeconds() === 0) {
+        console.log('[updateQuitTimer] quitDT =', quitDT.toString(),
+                    '| now =', now.toString(),
+                    '| diffMs =', diffMs);
+    }
 
     if (diffMs < 0) {
         // Quit date/time is in the future
@@ -158,8 +168,12 @@ function animateCount(el, target, prefix = '', suffix = '', decimals = 0) {
 async function loadProfile() {
     try {
         const res = await fetch('/api/user/profile', { headers: authHeaders() });
-        if (!res.ok) return;
+        if (!res.ok) {
+            console.warn('[loadProfile] API returned', res.status);
+            return;
+        }
         const p = await res.json();
+        console.log('[loadProfile] Raw API response:', JSON.stringify(p));
 
         if (p.quitDate) {
             // Backend returns full ISO-8601 local datetime, e.g. "2026-06-15T13:52:00".
@@ -167,14 +181,32 @@ async function loadProfile() {
             const hasTime  = p.quitDate.includes('T');
             const datePart = hasTime ? p.quitDate.split('T')[0] : p.quitDate;
             const timePart = hasTime ? p.quitDate.split('T')[1].substring(0, 5) : '12:00'; // HH:MM 24-hr
+            console.log('[loadProfile] Parsed → date:', datePart, ' time(24h):', timePart);
 
             document.getElementById('upd-quit-date').value = datePart;
-            setTimePicker(timePart);  // ← restores hour/minute/AM-PM selects exactly
             document.getElementById('upd-cigs').value = p.cigsPerDay        || '';
             document.getElementById('upd-cost').value = p.costPerCigarette  || '';
 
+            // ── FIX: Defer setTimePicker so it runs AFTER the browser's own
+            //    form-restore (which fires after DOMContentLoaded / script execution).
+            //    On F5 / Ctrl+Shift+R, many browsers re-apply cached <select> values
+            //    asynchronously, clobbering any values JS set synchronously.
+            //    Using setTimeout(…, 0) pushes our setter to the next microtask,
+            //    guaranteeing it runs LAST and "wins" over browser autofill.
+            setTimeout(() => {
+                console.log('[loadProfile] Setting time picker to:', timePart);
+                setTimePicker(timePart);
+                // Verify the values actually stuck
+                console.log('[loadProfile] After setTimePicker → hour:',
+                    document.getElementById('tp-hour').value,
+                    'minute:', document.getElementById('tp-minute').value,
+                    'AM active:', document.getElementById('ampm-am').classList.contains('active'),
+                    'PM active:', document.getElementById('ampm-pm').classList.contains('active'));
+            }, 0);
+
             startQuitTimer(datePart, timePart);
         } else {
+            console.log('[loadProfile] No quitDate found — showing setup banner');
             document.getElementById('upd-cigs').value = p.cigsPerDay        || '';
             document.getElementById('upd-cost').value = p.costPerCigarette  || '';
             showEl('setup-banner');
@@ -276,6 +308,9 @@ async function updateQuitInfo() {
     const cigsPerDay       = document.getElementById('upd-cigs').value;
     const costPerCigarette = document.getElementById('upd-cost').value;
 
+    console.log('[updateQuitInfo] Saving → date:', quitDate, ' time(24h):', quitTime,
+                ' cigs:', cigsPerDay, ' cost:', costPerCigarette);
+
     if (!quitDate) { showUpdateAlert('Please set a quit date.', 'danger'); return; }
 
     try {
@@ -291,6 +326,7 @@ async function updateQuitInfo() {
         });
         const data = await res.json();
         if (res.ok) {
+            console.log('[updateQuitInfo] Save successful:', data.message);
             showUpdateAlert('✅ ' + data.message, 'success');
             hideEl('setup-banner');
             startQuitTimer(quitDate, quitTime);

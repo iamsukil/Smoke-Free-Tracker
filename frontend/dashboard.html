@@ -334,9 +334,9 @@
             <!-- Custom AM/PM picker — avoids the native 12-hr spinner
                  that lets users accidentally leave AM selected when they mean PM -->
             <div class="time-picker" id="quit-time-picker">
-              <select class="time-sel" id="tp-hour"  aria-label="Hour"></select>
+              <select class="time-sel" id="tp-hour"  aria-label="Hour" autocomplete="off"></select>
               <span  class="time-colon">:</span>
-              <select class="time-sel" id="tp-minute" aria-label="Minute"></select>
+              <select class="time-sel" id="tp-minute" aria-label="Minute" autocomplete="off"></select>
               <div class="ampm-toggle">
                 <button type="button" class="ampm-btn" id="ampm-am" onclick="setAmPm('AM')">AM</button>
                 <button type="button" class="ampm-btn" id="ampm-pm" onclick="setAmPm('PM')">PM</button>
